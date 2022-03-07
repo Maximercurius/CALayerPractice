@@ -8,8 +8,18 @@
 
 import UIKit
 
-class SecondViewController: UIViewController {
+class SecondViewController: UIViewController, CAAnimationDelegate {
     
+    var shapeLayer: CAShapeLayer! {
+        didSet {
+            shapeLayer.lineWidth = 17
+            shapeLayer.fillColor = nil
+            shapeLayer.lineCap = .butt
+            shapeLayer.strokeEnd = 0
+            let color = UIColor.green.cgColor
+            shapeLayer.strokeColor = color
+        }
+    }
 
     
     var gradientLayer: CAGradientLayer! {
@@ -45,14 +55,42 @@ class SecondViewController: UIViewController {
         }
     }
     
+    func configShapeLayer(_ shapeLayer: CAShapeLayer) {
+        shapeLayer.frame = view.bounds
+        let path = UIBezierPath(arcCenter: imageView.center, radius: imageView.frame.size.width / 2, startAngle: 0, endAngle: .pi * 2, clockwise: true)
+        shapeLayer.path = path.cgPath
+        
+    }
+    
     override func viewDidLayoutSubviews() {
         gradientLayer.frame = CGRect(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height)
+        configShapeLayer(shapeLayer)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         gradientLayer = CAGradientLayer()
         view.layer.insertSublayer(gradientLayer, at: 0)
+        
+        shapeLayer = CAShapeLayer()
+        view.layer.addSublayer(shapeLayer)
     }
 
-}
+    @IBAction func takeCupAction(_ sender: UIButton) {
+        let animation = CABasicAnimation(keyPath: "strokeEnd")
+        animation.toValue = 1
+        animation.duration = 2
+        
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeOut)
+        animation.fillMode = CAMediaTimingFillMode.both
+        animation.isRemovedOnCompletion = true
+       
+        animation.delegate = self
+        
+        shapeLayer.add(animation, forKey: nil)
+    }
+    
+    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        dismiss(animated: true)
+        }
+    }
